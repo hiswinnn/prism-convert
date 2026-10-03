@@ -232,8 +232,12 @@ export async function loadFfmpegCore({ onProgress, onNote } = {}) {
   const custom = engineMirrorOverride();
   const tarballUrls = custom ? [custom] : MIRROR_TARBALLS.map((fn) => fn());
 
+  // 断网（或明确离线）时别去镜像/CDN 上傻等：直接落到本站的 gz/原始文件。
+  // 这是「下载到本地、没网也能用」的关键——本站文件就在 dist 里，随离线包一起分发。
+  const offline = (typeof navigator !== 'undefined' && navigator.onLine === false) || (globalThis.location?.protocol === 'file:');
+
   // ① npm 镜像 tarball：一次请求拿到 js + wasm
-  for (const url of tarballUrls) {
+  for (const url of offline ? [] : tarballUrls) {
     try {
       onNote?.(`正在从引擎镜像下载（${new URL(url).host}）…`);
       const gz = await fetchBytes(url, {
