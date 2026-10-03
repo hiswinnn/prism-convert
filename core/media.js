@@ -11,6 +11,7 @@
  * @typedef {import('./types.js').Api} Api
  */
 import { ConversionError } from './errors.js';
+import { loadFfmpegCore } from './lib-loader.js';
 import { extOf, mimeOfExt } from './util.js';
 
 const AUDIO_TARGETS = new Set(['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac', 'opus']);
@@ -427,12 +428,24 @@ function engineUnavailable() {
 async function acquireFFmpeg(api) {
   if (!ffmpegPromise) {
     ffmpegPromise = (async () => {
-      if (typeof api.asset !== 'function') throw engineUnavailable();
       const { FFmpeg } = await api.lib('@ffmpeg/ffmpeg');
-      const [coreURL, wasmURL] = await Promise.all([api.asset('ffmpeg-core.js'), api.asset('ffmpeg-core.wasm')]);
-      if (!coreURL || !wasmURL) throw engineUnavailable();
+      // 引擎来源由 lib-loader 决定：国内 npm 镜像优先（实测 15MB/s），本站与公共 CDN 兜底。
+      // 直接把 asset 里的两个 URL 丢给 ffmpeg.load() 是不够的——本站若在海外托管，
+      // 30MB 的 wasm 可能让用户等上十几分钟。
+      const core = await loadFfmpegCore({
+        onProgress: (ratio, received, total, label) => {
+          const mb = (n) => (n / 1024 / 1024).toFixed(1);
+          api.progress(0.05 + ratio * 0.15, total ? `${label} ${mb(received)}/${mb(total)} MB` : label);
+        },
+        onNote: (message) => api.note('info', message),
+      });
       const ffmpeg = new FFmpeg();
-      await ffmpeg.load({ coreURL, wasmURL });
+      try {
+        await ffmpeg.load({ coreURL: core.coreURL, wasmURL: core.wasmURL });
+      } catch (err) {
+        core.revoke?.(); // blob URL 要回收，否则反复重试会把内存吃掉
+        throw err;
+      }
       return ffmpeg;
     })().catch((err) => {
       ffmpegPromise = null; // 加载失败不能把坏实例一直缓存着，否则用户重试也永远失败

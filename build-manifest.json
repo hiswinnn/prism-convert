@@ -1,11 +1,15 @@
 {
-  "builtAt": "2026-10-03T07:26:28.025Z",
-  "totalBytes": 47969326,
-  "fileCount": 258,
+  "builtAt": "2026-10-03T07:38:56.961Z",
+  "totalBytes": 58236769,
+  "fileCount": 259,
   "biggest": [
     {
       "path": "vendor/lib/@ffmpeg/core/dist/esm/ffmpeg-core.wasm",
       "mb": 30.74
+    },
+    {
+      "path": "vendor/lib/@ffmpeg/core/dist/esm/ffmpeg-core.wasm.gz",
+      "mb": 9.78
     },
     {
       "path": "vendor/lib/pdfjs-dist/build/pdf.worker.mjs",
@@ -30,10 +34,6 @@
     {
       "path": "vendor/lib/docx/dist/index.mjs",
       "mb": 1.14
-    },
-    {
-      "path": "vendor/lib/xlsx/xlsx.mjs",
-      "mb": 0.85
     }
   ],
   "vendor": {
