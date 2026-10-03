@@ -1,0 +1,227 @@
+/* ------------------------------------------------------------------ *
+ * 设计令牌：液态玻璃（Liquid Glass）
+ * 手机与电脑共用同一套令牌，只有尺寸与交互反馈不同——「同一块玻璃切成不同尺寸」。
+ * ------------------------------------------------------------------ */
+:root {
+  color-scheme: dark;
+
+  /* 背景：光线在深处的底色 */
+  --bg-deep: #04050b;
+  --bg-base: #080b16;
+  --bg-raise: #0d1220;
+
+  /* 玻璃材质 */
+  --glass-fill: linear-gradient(150deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.05) 42%, rgba(255, 255, 255, 0.08) 100%);
+  --glass-fill-soft: linear-gradient(150deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
+  --glass-stroke: rgba(255, 255, 255, 0.18);
+  --glass-stroke-strong: rgba(255, 255, 255, 0.30);
+  --glass-inner-light: rgba(255, 255, 255, 0.55);
+  --glass-blur: 30px;
+  --glass-saturate: 175%;
+  --glass-sheen: rgba(255, 255, 255, 0.55);
+
+  /* 光：棱镜色 */
+  --accent-cyan: #6fe3ff;
+  --accent-violet: #a78bfa;
+  --accent-pink: #ff86c8;
+  --accent-mint: #7cf7c4;
+  --accent-amber: #ffd479;
+  --accent-gradient: linear-gradient(100deg, var(--accent-cyan), var(--accent-violet) 52%, var(--accent-pink));
+
+  /* 文字 */
+  --text-1: rgba(255, 255, 255, 0.97);
+  --text-2: rgba(255, 255, 255, 0.74);
+  --text-3: rgba(255, 255, 255, 0.50);
+  --text-inverse: #06070d;
+
+  /* 语义色 */
+  --ok: #4ade80;
+  --warn: #fbbf24;
+  --err: #fb7185;
+  --ok-soft: rgba(74, 222, 128, 0.16);
+  --warn-soft: rgba(251, 191, 36, 0.16);
+  --err-soft: rgba(251, 113, 133, 0.16);
+
+  /* 形状 */
+  --r-xl: 34px;
+  --r-lg: 26px;
+  --r-md: 18px;
+  --r-sm: 12px;
+  --r-pill: 999px;
+
+  /* 阴影与光晕 */
+  --shadow-deep: 0 24px 60px -18px rgba(0, 0, 0, 0.72), 0 4px 14px rgba(0, 0, 0, 0.32);
+  --shadow-float: 0 10px 30px -10px rgba(0, 0, 0, 0.55);
+  --glow-cyan: 0 0 24px rgba(111, 227, 255, 0.35);
+  --glow-violet: 0 0 28px rgba(167, 139, 250, 0.32);
+
+  /* 动效 */
+  --ease-liquid: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.42, 0.5, 1);
+  --dur-instant: 110ms;
+  --dur-quick: 200ms;
+  --dur-calm: 420ms;
+  --dur-slow: 900ms;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "HarmonyOS Sans SC",
+    "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
+
+  /* 布局 */
+  --pad-page: clamp(16px, 3.2vw, 34px);
+  --gap-grid: clamp(12px, 1.6vw, 20px);
+  --tabbar-h: 66px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 浅色：玻璃不变暗，只是让光线内敛 */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg-deep: #eef1f8;
+  --bg-base: #f6f7fc;
+  --bg-raise: #ffffff;
+  --glass-fill: linear-gradient(150deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.52) 55%, rgba(255, 255, 255, 0.66) 100%);
+  --glass-fill-soft: linear-gradient(150deg, rgba(255, 255, 255, 0.66) 0%, rgba(255, 255, 255, 0.4) 100%);
+  --glass-stroke: rgba(255, 255, 255, 0.9);
+  --glass-stroke-strong: rgba(255, 255, 255, 1);
+  --glass-inner-light: rgba(255, 255, 255, 0.95);
+  --glass-blur: 26px;
+  --glass-saturate: 165%;
+  --glass-sheen: rgba(255, 255, 255, 0.85);
+  --text-1: rgba(12, 16, 32, 0.95);
+  --text-2: rgba(12, 16, 32, 0.68);
+  --text-3: rgba(12, 16, 32, 0.46);
+  --text-inverse: #ffffff;
+  --shadow-deep: 0 22px 50px -20px rgba(31, 41, 82, 0.35), 0 3px 12px rgba(31, 41, 82, 0.12);
+  --shadow-float: 0 10px 26px -12px rgba(31, 41, 82, 0.28);
+  --ok: #16a34a;
+  --warn: #d97706;
+  --err: #e11d48;
+}
+
+/* 低性能设备自动降级：毛玻璃面积越大越贵，宁可少糊一点也别卡 */
+:root[data-perf='lite'] {
+  --glass-blur: 14px;
+  --glass-saturate: 130%;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* 图标统一口径：默认 1em，需要多大就在组件里覆盖。
+   不设这条的话 <svg><use> 会撑满容器——这是 SVG 精灵图最常见的翻车点。 */
+svg {
+  width: 1em;
+  height: 1em;
+  flex: none;
+  display: inline-block;
+  vertical-align: -0.12em;
+  fill: none;
+}
+
+#sprite { display: none; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--bg-deep);
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+body {
+  min-height: 100dvh;
+  /* 光在玻璃深处流动：三团缓慢漂移的色光 */
+  background:
+    radial-gradient(58% 42% at 12% 8%, rgba(111, 227, 255, 0.20), transparent 62%),
+    radial-gradient(48% 40% at 88% 12%, rgba(167, 139, 250, 0.22), transparent 60%),
+    radial-gradient(60% 46% at 72% 92%, rgba(255, 134, 200, 0.16), transparent 64%),
+    linear-gradient(180deg, var(--bg-base), var(--bg-deep));
+  background-attachment: fixed;
+}
+
+:root[data-theme='light'] body {
+  background:
+    radial-gradient(58% 42% at 10% 6%, rgba(111, 227, 255, 0.34), transparent 62%),
+    radial-gradient(50% 40% at 90% 10%, rgba(167, 139, 250, 0.30), transparent 60%),
+    radial-gradient(60% 46% at 70% 94%, rgba(255, 134, 200, 0.26), transparent 64%),
+    linear-gradient(180deg, var(--bg-base), var(--bg-deep));
+}
+
+/* 光在玻璃深处流动：三团色光缓慢漂移（只动 transform，不触发重排，手机上也不掉帧） */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -22%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(36% 30% at 18% 24%, rgba(111, 227, 255, 0.30), transparent 68%),
+    radial-gradient(34% 28% at 84% 18%, rgba(167, 139, 250, 0.34), transparent 66%),
+    radial-gradient(42% 34% at 64% 86%, rgba(255, 134, 200, 0.22), transparent 70%);
+  filter: blur(26px) saturate(125%);
+  animation: light-drift 26s ease-in-out infinite alternate;
+}
+
+@keyframes light-drift {
+  from { transform: translate3d(-2%, -1.5%, 0) scale(1); }
+  to { transform: translate3d(3%, 2.5%, 0) scale(1.08); }
+}
+
+/* 暗角：让中间的玻璃浮起来，同时压住四角避免背景过亮抢戏 */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(120% 100% at 50% 0%, transparent 45%, rgba(0, 0, 0, 0.42));
+}
+
+:root[data-theme='light'] body::after { background: radial-gradient(120% 100% at 50% 0%, transparent 48%, rgba(31, 41, 82, 0.14)); }
+
+
+::selection { background: rgba(167, 139, 250, 0.35); }
+
+:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.5rem, 3.6vw, 2.1rem); }
+h2 { font-size: clamp(1.15rem, 2.4vw, 1.4rem); }
+h3 { font-size: 1.02rem; }
+p { margin: 0; }
+a { color: var(--accent-cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button, input, select, textarea { font: inherit; color: inherit; }
+code, pre, .mono { font-family: var(--font-mono); font-variant-ligatures: none; }
+
+.num { font-variant-numeric: tabular-nums; }
+
+/* 滚动条也做成玻璃的边缘 */
+* { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.22) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.12));
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: var(--r-pill);
+}
+*::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.2)); background-clip: content-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "builtAt": "2026-10-03T07:19:00.627Z",
+  "totalBytes": 47968420,
+  "fileCount": 258,
+  "biggest": [
+    {
+      "path": "vendor/lib/@ffmpeg/core/dist/esm/ffmpeg-core.wasm",
+      "mb": 30.74
+    },
+    {
+      "path": "vendor/lib/pdfjs-dist/build/pdf.worker.mjs",
+      "mb": 2.13
+    },
+    {
+      "path": "vendor/lib/libheif-js/libheif-wasm/libheif-bundle.js",
+      "mb": 1.9
+    },
+    {
+      "path": "vendor/lib/libheif-js/libheif-wasm/libheif-bundle.mjs",
+      "mb": 1.9
+    },
+    {
+      "path": "vendor/lib/pdf-lib/dist/pdf-lib.esm.js",
+      "mb": 1.51
+    },
+    {
+      "path": "vendor/lib/libheif-js/libheif-wasm/libheif.wasm",
+      "mb": 1.36
+    },
+    {
+      "path": "vendor/lib/docx/dist/index.mjs",
+      "mb": 1.14
+    },
+    {
+      "path": "vendor/lib/xlsx/xlsx.mjs",
+      "mb": 0.85
+    }
+  ],
+  "vendor": {
+    "index.html": "891cf22d59a2ed6b",
+    "main.js": "71aaa65b87f0bc6f",
+    "core/engine.js": "8d39cb65103ab42a"
+  }
+}
