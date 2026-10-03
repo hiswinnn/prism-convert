@@ -14,6 +14,7 @@
 import { ConversionError } from './errors.js';
 import { baseNameOf, extOf, htmlEscape, mimeOfExt } from './util.js';
 import { canvasToBlob, getCanvas, toPngBytes } from './image.js';
+import { vendorUrl } from './lib-loader.js';
 
 export const meta = {
   id: 'pdf',
@@ -49,13 +50,14 @@ const TEXT_LAYOUT = { margin: 56, fontSize: 11, leading: 16.5 };
 const RENDER_JPEG_QUALITY = 0.92;
 /**
  * pdfjs 在浏览器里需要的静态资源路径。
- * 必须与 src/core/lib-loader.js 的 /vendor/lib 映射一致——dev-server 把 /vendor/lib/* 直接镜像到 node_modules，
- * 自己另编一套路径（例如 /vendor/pdfjs/）会 404，表现为「PDF 解析失败」或 worker 起不来。
+ * 用 lib-loader 的 vendorUrl 拼：它基于模块自身 URL 解析，所以站点部署在子路径
+ * （如 https://user.github.io/repo/）时也是对的。写成 '/vendor/lib/...' 这种根绝对路径
+ * 只在本地（站点即在根）能跑，线上会 404，表现为「PDF 解析失败 / worker 起不来」。
  */
 const PDFJS_ASSETS = {
-  worker: '/vendor/lib/pdfjs-dist/build/pdf.worker.mjs',
-  standardFonts: '/vendor/lib/pdfjs-dist/standard_fonts/',
-  cmaps: '/vendor/lib/pdfjs-dist/cmaps/',
+  worker: vendorUrl('pdfjs-dist/build/pdf.worker.mjs'),
+  standardFonts: vendorUrl('pdfjs-dist/standard_fonts/'),
+  cmaps: vendorUrl('pdfjs-dist/cmaps/'),
 };
 
 /* ------------------------------------------------------------------ *

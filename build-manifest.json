@@ -1,6 +1,6 @@
 {
-  "builtAt": "2026-10-03T07:19:00.627Z",
-  "totalBytes": 47968420,
+  "builtAt": "2026-10-03T07:26:28.025Z",
+  "totalBytes": 47969326,
   "fileCount": 258,
   "biggest": [
     {
@@ -37,7 +37,7 @@
     }
   ],
   "vendor": {
-    "index.html": "891cf22d59a2ed6b",
+    "index.html": "455b869c26cd514d",
     "main.js": "71aaa65b87f0bc6f",
     "core/engine.js": "8d39cb65103ab42a"
   }
