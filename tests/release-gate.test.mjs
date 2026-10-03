@@ -13,7 +13,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { CONVERTERS, canonicalExt, findCandidates, targetsFor } from '../src/core/registry.js';
@@ -152,4 +152,38 @@ test('原地转（txt→txt）必须落到文档模块，而不是被别的模�
   assert.ok(candidates.includes('document'), `txt→txt 候选里应有 document，实际 ${candidates.join(', ')}`);
   assert.ok(!candidates.includes('pdf'), 'PDF 模块不该接 txt→txt（它的 from/to 都含 txt，但那是为了 txt→PDF）');
   assert.ok(targetsFor('docx').includes('md'));
+});
+
+test('禁止根绝对路径引用 vendor（子路径部署会全部 404）', async () => {
+  // 这个 bug 本地永远测不出来：dev-server 与 dist 都挂在站点根，只有部署到
+  // https://<user>.github.io/<repo>/ 这种子路径才会暴露。
+  const { readdir, readFile } = await import('node:fs/promises');
+  const roots = [join(PROJECT, 'src')];
+  const files = [];
+  const walk = async (dir) => {
+    for (const entry of await readdir(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) await walk(full);
+      else if (/\.(js|mjs|html)$/.test(entry.name)) files.push(full);
+    }
+  };
+  for (const root of roots) await walk(root);
+
+  const offenders = [];
+  for (const file of files) {
+    const name = basename(file);
+    // sw.js 是例外：它比对的是「请求路径」，本身就是站点相对量，写绝对前缀是对的
+    if (name === 'sw.js') continue;
+    const lines = (await readFile(file, 'utf8')).split('\n');
+    lines.forEach((line, index) => {
+      const code = line.trim();
+      if (code.startsWith('*') || code.startsWith('//') || code.startsWith('/*')) return; // 注释里的说明不算
+      if (/(['"`(])\/vendor\//.test(line)) offenders.push(`${name}:${index + 1}  ${code.slice(0, 80)}`);
+    });
+  }
+  assert.deepEqual(offenders, [], `这些位置用了根绝对路径，子路径部署会 404：\n${offenders.join('\n')}`);
+
+  const { VENDOR_BASE, vendorUrl } = await import('../src/core/lib-loader.js');
+  assert.ok(!VENDOR_BASE.startsWith('/'), 'vendor 基址必须是 URL（由 import.meta.url 推导），不能是根绝对路径');
+  assert.ok(vendorUrl('fflate/esm/browser.js').includes('vendor/lib/fflate'), 'vendorUrl 要能拼出完整地址');
 });

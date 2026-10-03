@@ -1,0 +1,38 @@
+[
+  { "type": "goto", "url": "https://hiswinnn.github.io/prism-convert/", "settle": 4000 },
+  { "type": "setDesktop", "width": 1440, "height": 1100 },
+  {
+    "type": "upload",
+    "selector": ".dropzone input[type=file]",
+    "files": [
+      "tests/fixtures/e2e/chatgpt-导出.json",
+      "tests/fixtures/e2e/小说片段-gbk.txt",
+      "tests/fixtures/e2e/员工表.xlsx",
+      "tests/fixtures/e2e/季度报告.docx",
+      "tests/fixtures/e2e/样张.pdf",
+      "tests/fixtures/e2e/色块.bmp",
+      "tests/fixtures/e2e/字幕.srt",
+      "tests/fixtures/e2e/音调.wav"
+    ],
+    "settle": 3000
+  },
+  { "type": "wait", "forSelector": "[data-file-card]", "timeout": 30000 },
+  { "type": "wait", "ms": 1500 },
+  { "type": "eval", "expr": "const card = [...document.querySelectorAll('[data-file-card]')].find(c => c.querySelector('.filecard__name').textContent.includes('色块')); [...card.querySelectorAll('.chip')].find(c => c.textContent.includes('JPEG'))?.click(); return 'jpeg';" },
+  { "type": "wait", "ms": 500 },
+  { "type": "eval", "expr": "const card = [...document.querySelectorAll('[data-file-card]')].find(c => c.querySelector('.filecard__name').textContent.includes('音调')); [...card.querySelectorAll('.chip')].find(c => c.textContent.includes('MP3'))?.click(); return 'mp3';" },
+  { "type": "wait", "ms": 500 },
+  { "type": "eval", "expr": "const card = [...document.querySelectorAll('[data-file-card]')].find(c => c.querySelector('.filecard__name').textContent.includes('样张')); [...card.querySelectorAll('.chip')].find(c => c.textContent.includes('PNG'))?.click(); return 'pdf-png';" },
+  { "type": "wait", "ms": 500 },
+  { "type": "eval", "expr": "const card = [...document.querySelectorAll('[data-file-card]')].find(c => c.querySelector('.filecard__name').textContent.includes('小说片段')); return { name: card.querySelector('.filecard__name').textContent, badges: [...card.querySelectorAll('.badge')].map(b => b.textContent.trim()), active: card.querySelector('.chip--active')?.textContent?.trim() };" },
+  { "type": "screenshot", "path": ".tmp/shots/live-queue.png", "fullPage": true },
+  { "type": "click", "selector": ".panel__head .btn--primary", "settle": 5000 },
+  { "type": "wait", "ms": 90000 },
+  {
+    "type": "eval",
+    "expr": "return { url: location.href, done: document.querySelectorAll('[data-state=done]').length, error: document.querySelectorAll('[data-state=error]').length, results: [...document.querySelectorAll('.result')].map(r => ({ name: r.querySelector('.result__name')?.textContent, badges: [...r.querySelectorAll('.badge')].map(b => b.textContent.trim()) })), errors: [...document.querySelectorAll('[data-status=fail] .case__detail')].map(e => e.textContent.slice(0, 160)) };"
+  },
+  { "type": "screenshot", "path": ".tmp/shots/live-results.png", "fullPage": true },
+  { "type": "setMobile", "width": 390, "height": 844 },
+  { "type": "screenshot", "path": ".tmp/shots/live-mobile.png", "fullPage": true }
+]

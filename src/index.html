@@ -17,25 +17,25 @@
 <link rel="stylesheet" href="./styles/app.css" />
 <!--
   裸模块名映射：让 src/core/* 里的 `api.lib('fflate')` 与第三方 ESM 内部的裸导入
-  在浏览器里也能解析——服务端把 /vendor/lib/* 映射到 node_modules 的真实相对路径，
-  所以既不需要打包器，Node 侧（node --test）也走同一份代码。
+  在浏览器里也能解析。值用**相对的 ./vendor/lib/**（相对本文档），这样站点部署在
+  子路径（如 https://user.github.io/repo/）时不会指向域名根目录而 404。
 -->
 <script type="importmap">
 {
   "imports": {
-    "fflate": "/vendor/lib/fflate/esm/browser.js",
-    "xlsx": "/vendor/lib/xlsx/xlsx.mjs",
-    "pdf-lib": "/vendor/lib/pdf-lib/dist/pdf-lib.esm.js",
-    "pdfjs-dist": "/vendor/lib/pdfjs-dist/build/pdf.mjs",
-    "pdfjs-dist/": "/vendor/lib/pdfjs-dist/",
-    "mammoth": "/vendor/lib/mammoth/mammoth.browser.min.js",
-    "docx": "/vendor/lib/docx/dist/index.mjs",
-    "marked": "/vendor/lib/marked/lib/marked.esm.js",
-    "turndown": "/vendor/lib/turndown/lib/turndown.browser.es.js",
-    "js-yaml": "/vendor/lib/js-yaml/dist/js-yaml.mjs",
-    "@ffmpeg/ffmpeg": "/vendor/lib/@ffmpeg/ffmpeg/dist/esm/index.js",
-    "@ffmpeg/core": "/vendor/lib/@ffmpeg/core/dist/umd/ffmpeg-core.js",
-    "libheif-js": "/vendor/lib/libheif-js/libheif-wasm/libheif-bundle.mjs"
+    "fflate": "./vendor/lib/fflate/esm/browser.js",
+    "xlsx": "./vendor/lib/xlsx/xlsx.mjs",
+    "pdf-lib": "./vendor/lib/pdf-lib/dist/pdf-lib.esm.js",
+    "pdfjs-dist": "./vendor/lib/pdfjs-dist/build/pdf.mjs",
+    "pdfjs-dist/": "./vendor/lib/pdfjs-dist/",
+    "mammoth": "./vendor/lib/mammoth/mammoth.browser.min.js",
+    "docx": "./vendor/lib/docx/dist/index.mjs",
+    "marked": "./vendor/lib/marked/lib/marked.esm.js",
+    "turndown": "./vendor/lib/turndown/lib/turndown.browser.es.js",
+    "js-yaml": "./vendor/lib/js-yaml/dist/js-yaml.mjs",
+    "@ffmpeg/ffmpeg": "./vendor/lib/@ffmpeg/ffmpeg/dist/esm/index.js",
+    "@ffmpeg/core": "./vendor/lib/@ffmpeg/core/dist/esm/ffmpeg-core.js",
+    "libheif-js": "./vendor/lib/libheif-js/libheif-wasm/libheif-bundle.mjs"
   }
 }
 </script>
