@@ -54,7 +54,7 @@ function statChip(iconName, text) {
 
 function footerNote() {
   return h('p', { class: 'panel__hint', style: { paddingInline: '0.3rem' } },
-    '提示：文件不会离开这台设备。首次使用音视频转换时会下载一次 WASM 引擎（约 30MB），之后离线可用。');
+    '文件不会离开这台设备。音视频转换首次会下载一次引擎（约 20MB，走国内镜像，通常几秒完成），之后离线也能用。');
 }
 
 /* ------------------------------- 拖放区 ------------------------------- */

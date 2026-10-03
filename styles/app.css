@@ -207,8 +207,8 @@
 .result__body { display: grid; gap: 0.55rem; }
 
 /* 空状态 */
-.empty { display: grid; gap: 0.4rem; place-items: center; padding: 1.6rem 1rem; text-align: center; color: var(--text-3); font-size: 0.88rem; }
-.empty svg { width: 34px; height: 34px; opacity: 0.55; }
+.empty { display: grid; gap: 0.35rem; place-items: center; padding: 1.05rem 1rem; text-align: center; color: var(--text-3); font-size: 0.86rem; }
+.empty svg { width: 26px; height: 26px; opacity: 0.5; }
 
 /* 统计卡 */
 .statgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.6rem; }
