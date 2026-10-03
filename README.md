@@ -1,4 +1,4 @@
-# 棱镜 Prism · 双端全能文件转换器
+﻿# 棱镜 Prism · 双端全能文件转换器
 
 纯前端的文件转换工具：**手机与电脑共用同一套界面与同一套引擎**，所有转换在你自己的设备上完成，
 没有服务器接收文件，首次加载后可离线使用。
@@ -102,7 +102,43 @@ ffmpeg 的 esm 分块）天然可用；`src/index.html` 里再放一张 import m
 `api.zip()` 必须同步返回字节、ffmpeg 命令必须以输出文件结尾、压缩包目录结构不能被压平、
 二进制容器不能被当成文本猜编码、原地转必须落到对的模块。
 
-## 6. 已知限制（如实说明）
+## 6. 部署到固定网址
+
+线上地址：**https://hiswinnn.github.io/prism-convert/**（源码仓库 `hiswinnn/prism-convert`）
+
+```powershell
+# 构建 + 推送到 gh-pages 并开启 Pages（需要 gh 已登录）
+node scripts/deploy.mjs --repo hiswinnn/prism-convert
+
+# 本机到 github.com 被重置时（国内常见），用 REST API 推送（走 api.github.com，实测可用）
+node scripts/push-via-api.mjs --repo hiswinnn/prism-convert --branch gh-pages --dir dist
+node scripts/push-via-api.mjs --repo hiswinnn/prism-convert --branch main --dir . --tracked
+```
+
+部署时踩到、且已经写进门禁测试的两个坑：
+
+1. **vendor 资源不能用根绝对路径**：`/vendor/lib/...` 在本机（站点即在根）能跑，
+   但部署到 `https://<user>.github.io/<repo>/` 会指向域名根目录而全部 404。
+   现在统一由 `lib-loader.js` 的 `vendorUrl()`（基于 `import.meta.url`）解析。
+2. **Service Worker 外壳必须网络优先**：早期用 stale-while-revalidate 缓存 HTML/JS，
+   发布新版本后老用户仍在跑旧代码，只有「改完发布、用户再打开」才暴露。现在改网络优先、离线回落缓存。
+
+### 音视频引擎为什么要走镜像
+
+实测本机到各源的下载速度（同一个 30.7MB wasm）：
+
+| 来源 | 速度 | 30MB 耗时 |
+| --- | --- | --- |
+| GitHub Pages（本站） | 0.03 MB/s | ≈ 17 分钟 |
+| jsdelivr | 0.16 MB/s | ≈ 3 分钟 |
+| unpkg | 0.36 MB/s | ≈ 85 秒 |
+| **registry.npmmirror.com（tarball）** | **15.3 MB/s** | **≈ 2 秒** |
+
+所以引擎默认从 npm 镜像的 tarball 拉取（一次请求同时得到 core.js 与 wasm，浏览器内用 fflate + 自写
+tar 解析就地解开），本站 gzip 版（30.7MB → 9.8MB）与公共 CDN 依次兜底；
+设置页可以填自定义镜像地址。引擎版本常量 `FFMPEG_CORE_VERSION` 与安装的依赖保持一致。
+
+## 7. 已知限制（如实说明）
 
 - **中文 → PDF**：纯前端没有可嵌入的中文字体，检测到中文会明确报错并建议「导出 HTML 后用浏览器打印为 PDF」。
 - **AVIF 编码**：Chromium 全系不带编码器（只有 Safari 16.4+ 能编），不支持时明确报错，不静默降级成 PNG。
@@ -111,7 +147,7 @@ ffmpeg 的 esm 分块）天然可用；`src/index.html` 里再放一张 import m
 - **超大文件**：全程内存处理，聊天记录 JSON >30MB 会截断并提示；压缩包解压前用声明大小拦截 >300MB。
 - **音视频**首次使用需下载约 30MB WASM 引擎（之后走缓存），iOS 低电量模式可能限制后台解码。
 
-## 7. 运维笔记（踩过的坑，写给未来的维护者）
+## 8. 运维笔记（踩过的坑，写给未来的维护者）
 
 1. **不要在 PowerShell 里整文件改写源码**：本机 `Get-Content | Set-Content` 会按 ANSI(CP936) 处理无 BOM 的
    UTF-8 文件，中文会被「二次编码」写坏，还会静默吞字节与换行。改源码只用编辑器工具（write/edit），查看看 `read`/`grep`。
@@ -125,3 +161,4 @@ ffmpeg 的 esm 分块）天然可用；`src/index.html` 里再放一张 import m
    给它 UMD 版会报 `failed to import ffmpeg-core.js`。
 5. **Cloudflare Pages 单文件上限 25MB**，而 `ffmpeg-core.wasm` 是 30.74MB —— 部署时要么换 GitHub Pages，
    要么把 core 换成 CDN 或切成两片。
+

@@ -1,0 +1,6 @@
+[
+  { "type": "goto", "url": "https://hiswinnn.github.io/prism-convert/?view=selftest&autorun=1", "settle": 8000 },
+  { "type": "setDesktop", "width": 1280, "height": 900 },
+  { "type": "wait", "ms": 90000 },
+  { "type": "eval", "expr": "return { summary: document.querySelector('.badge--ok, .badge--err')?.textContent?.trim(), fails: [...document.querySelectorAll('.case[data-status=fail]')].map(c => ({ name: c.querySelector('.case__name')?.textContent, detail: c.querySelector('.case__detail')?.textContent })), skips: [...document.querySelectorAll('.case[data-status=skip]')].map(c => c.querySelector('.case__name')?.textContent) };" }
+]

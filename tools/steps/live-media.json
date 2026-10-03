@@ -1,0 +1,15 @@
+[
+  { "type": "goto", "url": "https://hiswinnn.github.io/prism-convert/", "settle": 12000 },
+  { "type": "eval", "expr": "return { title: document.title, ready: document.readyState, hasDropzone: !!document.querySelector('.dropzone'), hasInput: !!document.querySelector('.dropzone input[type=file]'), nav: [...document.querySelectorAll('.nav__item')].map(n=>n.textContent.trim()), sw: !!navigator.serviceWorker.controller, theme: document.documentElement.dataset.theme };" },
+  { "type": "upload", "selector": ".dropzone input[type=file]", "files": ["tests/fixtures/e2e/音调.wav"], "settle": 3000 },
+  { "type": "wait", "forSelector": "[data-file-card]", "timeout": 30000 },
+  { "type": "eval", "expr": "const card = document.querySelector('[data-file-card]'); return { name: card.querySelector('.filecard__name').textContent, badges: [...card.querySelectorAll('.badge')].map(b=>b.textContent.trim()), chips: [...card.querySelectorAll('.chip')].map(c=>c.textContent.trim()) };" },
+  { "type": "eval", "expr": "const card = document.querySelector('[data-file-card]'); [...card.querySelectorAll('.chip')].find(c => c.textContent.includes('MP3'))?.click(); return 'mp3-selected';" },
+  { "type": "wait", "ms": 800 },
+  { "type": "click", "selector": ".panel__head .btn--primary", "settle": 4000 },
+  { "type": "wait", "ms": 30000 },
+  { "type": "eval", "expr": "const card = document.querySelector('[data-file-card]'); return { state: card?.dataset.state, progressLabel: card?.querySelector('.optrow__label')?.textContent, notes: [...document.querySelectorAll('.case__detail')].map(e=>e.textContent.slice(0,120)).slice(0,6) };" },
+  { "type": "wait", "ms": 45000 },
+  { "type": "eval", "expr": "const card = document.querySelector('[data-file-card]'); return { state: card?.dataset.state, results: [...document.querySelectorAll('.result__name')].map(n=>n.textContent), errors: [...document.querySelectorAll('[data-status=fail] .case__detail')].map(e=>e.textContent.slice(0,200)), notes: [...document.querySelectorAll('.case__detail')].map(e=>e.textContent.slice(0,140)).slice(0,8) };" },
+  { "type": "screenshot", "path": ".tmp/shots/live-media.png", "fullPage": true }
+]
