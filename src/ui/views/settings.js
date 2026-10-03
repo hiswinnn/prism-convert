@@ -103,7 +103,46 @@ function defaultsPanel() {
       h('div', { class: 'optrow' }, h('label', { class: 'optrow__label' }, '默认输出编码'), encodingSelect),
       shareToggle,
       h('p', { class: 'panel__hint' }, '老阅读器、老电视、部分国产软件只认 GBK，遇到乱码时优先试它。'),
+      engineMirrorRow(),
     ),
+  );
+}
+
+/**
+ * 音视频引擎地址：默认走国内 npm 镜像（比海外托管快几百倍），
+ * 留空则用内置的镜像顺序；填了就优先用它，方便自建反代或换镜像。
+ */
+function engineMirrorRow() {
+  const current = (() => {
+    try {
+      return localStorage.getItem('prism.engineMirror') ?? '';
+    } catch {
+      return '';
+    }
+  })();
+  const input = h('input', {
+    class: 'field',
+    type: 'text',
+    value: current,
+    placeholder: '留空 = 自动（国内镜像 → 本站 → 公共 CDN）',
+    onchange: (event) => {
+      const value = event.target.value.trim();
+      try {
+        if (value) localStorage.setItem('prism.engineMirror', value);
+        else localStorage.removeItem('prism.engineMirror');
+      } catch {
+        /* 隐私模式下写不了，忽略 */
+      }
+      toast(value ? '已保存自定义引擎地址' : '已恢复自动选择引擎源', 'ok');
+    },
+  });
+  return h('div', { class: 'optrow' },
+    h('label', { class: 'optrow__label' },
+      h('span', null, '音视频引擎地址'),
+      h('span', { class: 'optrow__value' }, current ? '自定义' : '自动'),
+    ),
+    input,
+    h('p', { class: 'panel__hint' }, '可填 @ffmpeg/core 的 tarball 地址（.tgz）或自建镜像；首次音视频转换时下载约 20MB，之后离线可用。'),
   );
 }
 

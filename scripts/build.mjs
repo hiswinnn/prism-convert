@@ -10,7 +10,7 @@
  */
 import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -77,6 +77,17 @@ for (const rel of VENDOR) {
 }
 if (missing.length) {
   console.warn(`  ⚠ 缺失（请检查依赖是否安装）：${missing.join(', ')}`);
+}
+
+// 音视频引擎额外产出 gzip 版：30.7MB → 约 9.8MB。
+// 同源兜底时优先传它（浏览器用 DecompressionStream/fflate 解开），海外托管也能忍。
+const wasmPath = join(OUT, 'vendor', 'lib', '@ffmpeg', 'core', 'dist', 'esm', 'ffmpeg-core.wasm');
+if (existsSync(wasmPath)) {
+  const { gzipSync } = await import('node:zlib');
+  const { readFileSync } = await import('node:fs');
+  const gz = gzipSync(readFileSync(wasmPath), { level: 9 });
+  await writeFile(`${wasmPath}.gz`, gz);
+  console.log(`  引擎 gzip：${(gz.length / 1024 / 1024).toFixed(1)} MB（原始 ${(statSync(wasmPath).size / 1024 / 1024).toFixed(1)} MB）`);
 }
 
 // GitHub Pages 默认用 Jekyll 处理站点，会忽略下划线开头的文件/目录

@@ -154,6 +154,45 @@ test('原地转（txt→txt）必须落到文档模块，而不是被别的模�
   assert.ok(targetsFor('docx').includes('md'));
 });
 
+test('ffmpeg 引擎：tarball 解包必须能取到 esm 的 core 与 wasm', async () => {
+  // 浏览器里引擎是从 npm 镜像的 .tgz 里就地解出来的（海外托管下直连太慢），
+  // 这条把解包逻辑钉住：路径写错的表现是「引擎加载失败」，很难查。
+  const { untar } = await import('../src/core/lib-loader.js');
+
+  const entries = [
+    ['package/package.json', '{"name":"@ffmpeg/core"}'],
+    ['package/dist/esm/ffmpeg-core.js', 'export default function createFFmpegCore(){}'],
+    ['package/dist/esm/ffmpeg-core.wasm', '\0asmfake'],
+    ['package/dist/umd/ffmpeg-core.js', 'umd 版本不该被选中'],
+  ];
+  const blocks = [];
+  for (const [name, content] of entries) {
+    const body = Buffer.from(content, 'utf8');
+    const header = Buffer.alloc(512);
+    header.write(name, 0, 'utf8');
+    header.write('0000644\0', 100, 'utf8');
+    header.write('0000000\0', 108, 'utf8');
+    header.write('0000000\0', 116, 'utf8');
+    header.write(`${body.length.toString(8).padStart(11, '0')}\0`, 124, 'utf8');
+    header.write('00000000000\0', 136, 'utf8');
+    header.write('0', 156, 'utf8');
+    header.write('ustar\0', 257, 'utf8');
+    blocks.push(header, body, Buffer.alloc((512 - (body.length % 512)) % 512));
+  }
+  blocks.push(Buffer.alloc(1024));
+
+  const files = untar(new Uint8Array(Buffer.concat(blocks)));
+  const core = files.get('package/dist/esm/ffmpeg-core.js');
+  const wasm = files.get('package/dist/esm/ffmpeg-core.wasm');
+  assert.ok(core, `没解出 esm core，解出的条目：${[...files.keys()].join(', ')}`);
+  assert.ok(wasm, '没解出 esm wasm');
+  assert.match(Buffer.from(core).toString('utf8'), /createFFmpegCore/);
+  assert.ok(!files.has('package/dist/esm/ffmpeg-core.js\u0000'), '文件名不该带空字节');
+  // 选路径必须精确到 dist/esm/（ffmpeg 的 module worker 只认 esm 构建）
+  assert.ok(files.has('package/dist/esm/ffmpeg-core.js'));
+  assert.ok(!files.has('package/dist/ffmpeg-core.js'), 'tarball 里没有 dist 根下的 core，取值路径必须写对');
+});
+
 test('禁止根绝对路径引用 vendor（子路径部署会全部 404）', async () => {
   // 这个 bug 本地永远测不出来：dev-server 与 dist 都挂在站点根，只有部署到
   // https://<user>.github.io/<repo>/ 这种子路径才会暴露。
