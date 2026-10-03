@@ -1,0 +1,155 @@
+{
+  "_artifact": {
+    "kind": "session-compression-summary",
+    "schema_version": 2,
+    "generated_at": "2026-10-03",
+    "purpose": "把「周考·双端全能文件转换程序」整段会话压缩成可无损续接的摘要，新会话导入后无需重述"
+  },
+  "session_identity": {
+    "session_id": "session-230f6de8-06fc-4b45-9a6e-6db2356a4808",
+    "session_name": "双端全能文件转换周考",
+    "workspace": "C:\\Users\\Sunjia\\Desktop",
+    "active_project": "E:\\Projects\\PrismConvert（棱镜 Prism，v1.1.0）",
+    "date_span": "2026-10-03",
+    "model": "deepseek-flash（DSH 桌面版）",
+    "goal": "周考固定题：手机端+电脑端纯前端、全类型文件转换、实操不报错、转换不乱码、画面精美、公网固定网址"
+  },
+  "user_messages_verbatim": [
+    "周考，固定题目任务 任务时长：我说“结束”为止，若未回复你便完成，则优化 任务要求：完成程序制作，手机端+电脑端纯前端。双端完成全类型文件转换程序，要求实操不报错，转换不乱码。通知要求画面精美，力求满分。分数频段：根据完成情况酌情给分 你可以通过向我提问达到我的要求来完成任务，把我看作考官，你是考生。共可问10题",
+    "（第1轮作答）锚点=json转txt；重点=上重型引擎（WASM/ffmpeg），宁可打开慢也要能力全；手机端=你帮我部署成公网网址；电脑端=两个端都考类发行版的水准；画面=「液态玻璃」长文描述（玻璃在指下流动、桌面图标悬浮在玻璃之下、滑动时光影折射高光、窗口从玻璃深处升起带光晕、深色模式让光线内敛折射更深、手机与电脑同一套液态玻璃语言、这是一块会呼吸的玻璃）",
+    "（第2轮作答）json转txt场景=AI 聊天记录导出 JSON → 可阅读的 TXT；公网部署=我要固定网址，我配合登录账号",
+    "（第3轮作答）公网托管=GitHub Pages（我推荐，音视频能力完整保留）；上线方式=你装 gh 命令行，我扫码/输码授权",
+    "（第4轮作答）GitHub 授权=已授权完成"
+  ],
+  "user_decisions": [
+    "锚点功能锁定为「AI 聊天记录导出 JSON → 可阅读 TXT」，做成独立的「对话工坊」页面",
+    "接受首次加载重型 WASM 引擎的代价，要求能力全",
+    "视觉基调＝液态玻璃（指针高光跟随、棱镜边缘、启动升起动效、深色让光线内敛）",
+    "交付标准＝两端都按发行版水准（开发版/正式版同源，不做玩具）",
+    "公网固定网址托管在 GitHub Pages，账号 hiswinnn",
+    "授权方式：安装 gh CLI 走设备码授权（已成功，凭据存 Windows keyring）"
+  ],
+  "projects": [
+    {
+      "path": "E:\\Projects\\PrismConvert",
+      "name": "棱镜 Prism",
+      "version": "1.1.0",
+      "live_url": "https://hiswinnn.github.io/prism-convert/",
+      "repo": "https://github.com/hiswinnn/prism-convert（main=源码，gh-pages=产物）"
+    }
+  ],
+  "phase_1_requirements": {
+    "actions": "先问 5 题锁定方向，再问 2 题锁定锚点与部署，共问 7 题（配额 10 题，留 3 题）",
+    "verification": "用户明确：锚点=AI 聊天记录 JSON→TXT；视觉=液态玻璃；公网=固定网址",
+    "evidence": "用户原话见 user_messages_verbatim"
+  },
+  "phase_2_architecture": {
+    "actions": "定接口契约 docs/CONTRACT.md，写引擎/注册表/编码识别/类型识别/lib-loader/zip；把九个转换模块并行外包给 6 个子会话",
+    "key_decisions": [
+      "不引入打包器：import map + /vendor/lib/* 镜像 node_modules，同一份代码可被 node --test 直接加载",
+      "模块只依赖 api.*（text/encode/lib/zip/progress/note/fileName/target），引擎负责补齐一切",
+      "引擎对「模块不认数据」的软失败做级联降级（聊天记录 → 结构化数据）",
+      "懒加载：禁止顶层 import 第三方库，一律 api.lib('名')"
+    ]
+  },
+  "phase_3_modules": {
+    "actions": "6 个子会话交付 chat-export / document / table+data / image+pdf / media+archive+subtitle / selftest+engine 测试",
+    "evidence": "各会话自报：chat-export 32 例、document 25 例、table+data 37 例、image+pdf 75 例、archive+subtitle+media 51 例、engine+selftest 20 例，全绿"
+  },
+  "phase_4_integration_fixes": {
+    "actions": "我（主会话）在集成期实测并修掉一批只有跨模块才暴露的缺陷",
+    "defects_fixed": [
+      "【最严重】引擎从不把「目标格式」下发给模块 → 6/6 最小作业静默产出错误格式（选 yaml 出 txt、选 vtt 出 srt）",
+      "detect.js 的 MAGIC 表里 PK\\x03\\x04 短路，导致 docx/xlsx/epub 全被判成 zip，文档/表格模块完全走不通",
+      "所有单文件产出被追加 -1 后缀（api.fileName 与引擎各自去重一次）",
+      "编码识别打分用「基础分+加分再 clamp」→ 所有候选并列 1.000，Big5 恒判 gb18030；改为归一加权平均",
+      "txt→txt 被 PDF 模块抢单（from/to 都含 txt）→ 新增「原地转只允许同类模块」规则",
+      "lib-loader 不认子路径 specifier（pdfjs-dist/legacy/build/pdf.mjs）→ 加通用兜底",
+      "WAV/AVI 的 RIFF 标识偏移写成 4（实际 8）→ .wav 识别不出来",
+      "registry 的 meta 比模块窄（缺 json/tgz/ssa/roleFilter/conversationIds/includeSystem/mp3cut）→ 全部补齐并加门禁测试",
+      "PDF 多页渲染把 api.zip() 的 Promise 当 bytes 用 → 引擎改为同步 zip/unzip",
+      "ffmpeg 参数缺输出文件名（wasm 下完才报「未指定输出文件」）→ 新增 buildCommand 并加测试",
+      "压缩包目录结构被引擎压平（flatten 开关失效）→ 逐段消毒保留层级",
+      "xlsx/docx 被当成文本猜编码（显示 Windows-1252 47%）→ 文本判定收窄",
+      "BMP→JPEG 在浏览器里误判「没有 Canvas」→ 图片模块配合修复（惰性补画布）",
+      "自检夹具用 docx 的 Packer.toBuffer（Node 专有）→ 改 toBlob",
+      "vendor 用根绝对路径 → 子路径部署全部 404（线上才暴露）",
+      "Service Worker 外壳 stale-while-revalidate → 发布后用户仍跑旧代码"
+    ],
+    "verification": "新增 tests/release-gate.test.mjs 把上述跨模块缺陷固化为断言；Node 251 项全绿"
+  },
+  "phase_5_browser_verification": {
+    "actions": "自建零依赖 CDP 无头浏览器驱动 tools/check.mjs（本机只有 Edge，没有 Chrome），能真上传文件、真点击、真截图、收集 console",
+    "evidence": [
+      "端到端：8 种真实文件（ChatGPT 导出 json / GBK txt / Big5 txt / xlsx / docx / pdf / bmp / srt）真上传真转换",
+      "浏览器专属：wav→mp3、wav→flac、pdf→txt、pdf→png（多页 zip）、bmp→jpg、bmp→webp 全部直连引擎通过",
+      "页面内自检：21/21 通过（含 Canvas 编码与 ffmpeg 真转码），线上复跑同样 21/21",
+      "线上端到端：done=7 / error=0，另有音视频单独验证通过"
+    ]
+  },
+  "phase_6_deployment": {
+    "actions": "winget 不可用需装到 C 盘 → 改为下 gh 官方 zip 解到 D:\\Apps\\gh；gh 设备码授权（账号 hiswinnn）；git init 提交 107 文件；建公开仓库；gh-pages 部署",
+    "obstacles": [
+      "github.com:443 被重置/超时（git push 不可用），但 api.github.com 通 → 改用 Git Data API 推送（scripts/push-via-api.mjs）",
+      "全局 git 配置把 github.com 重写成第三方镜像 ghfast.top（url.insteadOf），会把凭据发给第三方 → 用干净的 GIT_CONFIG_GLOBAL 绕开",
+      "GitHub Pages 到本机仅 0.03 MB/s，30MB 引擎要 17 分钟 → 引擎改走 registry.npmmirror.com 的 tarball（实测 15.3 MB/s，浏览器内 fflate+自写 tar 就地解包）"
+    ],
+    "evidence": "线上地址 https://hiswinnn.github.io/prism-convert/ 返回 200 且模块内容均为最新；音视频线上转换成功并提示「正在从引擎镜像下载（registry.npmmirror.com）」"
+  },
+  "environment_facts_and_traps": [
+    { "id": "E1", "fact": "本机没有 pwsh，命令由 Windows PowerShell 5.1 执行；Get-Content/Set-Content 默认 ANSI(CP936)，整文件改写无 BOM 的 UTF-8 源码会造成「二次编码」乱码并吞字节换行", "impact": "document.js/pdf.js/archive.js/module-api-stub.mjs 都被写坏过；源码一律只用 write/edit 工具改" },
+    { "id": "E2", "fact": "npm install --no-save 会剪掉上次装的包（项目无 package.json，且 package.json 被 dsh-autotier 写保护拦住）", "impact": "依赖必须一次命令装完；本机 npm 只能用 npm.cmd（npm.ps1 被执行策略拦住）" },
+    { "id": "E3", "fact": "DSH 会话记录 session.v4.jsonl.zstd 是「一帧一事件」的多帧 zstd，Node 自带解压只认第一帧", "impact": "tools/session-log.mjs 按魔数切帧后成功还原 27 个被误删文件" },
+    { "id": "E4", "fact": "某个子会话用通配删除（Remove-Item tests\\*）清空了 tests/ 根目录下除自己文件外的全部测试，项目无 git、回收站为空", "impact": "从会话记录里恢复 27 个文件；此后禁止在共享目录用通配删除" },
+    { "id": "E5", "fact": "@ffmpeg/ffmpeg 0.12 的 worker 是 module worker，必须配 @ffmpeg/core 的 dist/esm 构建", "impact": "给 UMD 版会报 failed to import ffmpeg-core.js（本地也一样，与网络无关）" },
+    { "id": "E6", "fact": "本机 gh 未安装；winget 装软件默认落 C 盘，违反磁盘约定", "impact": "改为下 gh 官方 zip 解到 D:\\Apps\\gh（14.8MB，v2.102.0）" },
+    { "id": "E7", "fact": "全局 git 配置 url.https://ghfast.top/https://github.com/.insteadOf https://github.com/", "impact": "git 操作会把凭据发给第三方镜像；部署脚本用干净的 GIT_CONFIG_GLOBAL 只保留 gh 凭据助手" },
+    { "id": "E8", "fact": "网络实测：github.com 直连被重置；api.github.com 200；GitHub Pages 0.03MB/s；jsdelivr 0.16；unpkg 0.36；registry.npmmirror.com 15.3MB/s", "impact": "推送走 API，引擎走 npmmirror" },
+    { "id": "E9", "fact": "本机没有 Chrome，只有 Edge（C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe）", "impact": "dsh-browser-panel 默认找不到浏览器（需 browserPath 配置）；改用自写 CDP 无头驱动" },
+    { "id": "E10", "fact": "GitHub Pages 需要 1-2 分钟构建，期间会继续服务旧版本", "impact": "部署后必须用「模块内容特征串」而不是 200 状态码判断新版本是否上线" }
+  ],
+  "current_state_at_stop": {
+    "node_tests": "251 通过 / 0 失败（node --test tests/*.test.mjs）",
+    "browser_selftest": "线上 21/21 通过",
+    "live_e2e": "线上端到端 7/8 文件一次成功、0 报错；音视频单独验证通过（镜像下载后秒级完成）",
+    "deployed": "GitHub Pages gh-pages 分支 5fe35aecad；源码 main 分支 c7bf07acd9",
+    "version": "1.1.0（已更新 VERSION / CHANGELOG.md / AI_MEMORY.md / README.md）",
+    "local_servers": "dev-server 4780（src）与 4781（dist）仍在后台运行，用于局域网调试"
+  },
+  "open_items": [
+    { "priority": "medium", "item": "音视频引擎首次 20MB 由 npmmirror 提供；若该镜像失效，设置页可填自定义地址（已有兜底链：本站 gzip → 本站原始 → unpkg）" },
+    { "priority": "medium", "item": "HEIC 在非 Safari 内核依赖 libheif-js，个别机型照片可能失败（会给出「改用 iPhone 分享为 JPEG」提示）" },
+    { "priority": "low", "item": "中文 → PDF 明确不支持（内置字体只有 WinAnsi），已给出「导出 HTML 后打印为 PDF」的可操作路径" },
+    { "priority": "low", "item": "dsh-browser-panel 需在配置里补 browserPath 指向 Edge 才能使用面板（本会话未改用户配置）" },
+    { "priority": "low", "item": "tests/helpers/module-api-stub.mjs 曾被写坏又恢复，建议后续有空重写；tests/.tmp/ 与 tools/*.mjs 探针脚本可清理" }
+  ],
+  "reusable_commands": {
+    "run_dev": "node server/dev-server.mjs  （4780；手机同 WiFi 用打印出的局域网地址）",
+    "serve_dist": "node server/dev-server.mjs --port 4781 --dir dist",
+    "test": "node --test tests/*.test.mjs",
+    "build": "node scripts/build.mjs",
+    "deploy_git": "node scripts/deploy.mjs --repo hiswinnn/prism-convert",
+    "deploy_api_fallback": "node scripts/push-via-api.mjs --repo hiswinnn/prism-convert --branch gh-pages --dir dist",
+    "browser_check": "node tools/check.mjs tools/steps/live-verify.json",
+    "make_fixtures": "node tools/make-fixtures.mjs",
+    "recover_deleted": "node tools/recover-from-sessions.mjs --dry"
+  },
+  "artifacts": {
+    "source_root": "E:\\Projects\\PrismConvert（src/core 9 个转换模块 + engine/registry/encoding/detect/lib-loader/selftest）",
+    "ui": "src/ui/views/{workbench,chat,matrix,settings,selftest}.js + styles/{tokens,glass,app}.css",
+    "tests": "tests/*.test.mjs（12 个文件，含 release-gate.test.mjs 跨模块门禁）",
+    "tools": "tools/{check.mjs（CDP 驱动）,make-fixtures.mjs,session-log.mjs,recover-from-sessions.mjs,enc-probe.mjs}",
+    "docs": "docs/{CONTRACT.md,QA-FINDINGS.md} + README.md + CHANGELOG.md + AI_MEMORY.md + VERSION",
+    "dist": "dist/（55.5MB，纯静态可直接托管）",
+    "screenshots": ".tmp/shots/final-*.png（桌面/手机 × 转换台/对话工坊/能力矩阵/设置/自检）"
+  },
+  "standing_rules": [
+    "磁盘：C=系统，D=APP/下载（gh 装在 D:\\Apps\\gh），E=项目与数据（项目在 E:\\Projects\\PrismConvert），F=游戏",
+    "代码风格：业务领域命名、注释只写为什么/坑、不吞异常、错误消息中文可操作、不引入不必要依赖",
+    "发布维护三件套：改代码后同步 VERSION / CHANGELOG.md / AI_MEMORY.md，并在回复末尾附版本号+类型+摘要",
+    "更新日志：只写用户可感知的高层变化，不写实现细节，每类最多 3-5 条",
+    "收工：把整段对话压成 JSON 摘要落两处（项目 docs/ 与桌面 聊啥_ 前缀），sha256 核对一致",
+    "禁止：用 shell 的 Get-Content/Set-Content 整文件改写源码；在共享目录用通配删除；把凭据交给第三方 git 镜像"
+  ],
+  "resume_prompt": "棱镜 Prism（E:\\Projects\\PrismConvert，v1.1.0）已经上线：https://hiswinnn.github.io/prism-convert/ 。这是周考作品——双端纯前端全能文件转换器，锚点功能是「AI 聊天记录导出 JSON → 可阅读 TXT」（对话工坊页），视觉是液态玻璃。当前状态：Node 单测 251/251、线上浏览器自检 21/21、线上端到端 7/8 文件一次成功且 0 报错、音视频经 npmmirror 镜像秒级转码成功。部署链路有坑：本机 github.com 直连被重置，必须用 `node scripts/push-via-api.mjs --repo hiswinnn/prism-convert --branch gh-pages --dir dist` 走 REST API 推送；全局 git 配置把 github.com 重写到 ghfast.top，脚本已用干净 GIT_CONFIG_GLOBAL 绕开。若要继续优化，优先看：HEIC 兼容、中文转 PDF 的替代路径（导出 HTML 后打印）、以及 .tmp/ 与 tests/.tmp 的清理。别用 PowerShell 改源码（会二次编码写坏中文），也别在共享目录用通配删除。"
+}

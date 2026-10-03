@@ -1,5 +1,5 @@
 /** 版本与构建信息：settings 页展示，发布时与根目录 VERSION 保持一致 */
-export const VERSION = '1.0.0';
+export const VERSION = '1.2.0';
 
 const cores = (typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 4;
 

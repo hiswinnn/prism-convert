@@ -1,0 +1,15 @@
+[
+  { "type": "goto", "url": "http://127.0.0.1:4790/", "settle": 5000 },
+  { "type": "eval", "expr": "return { title: document.title, ready: document.readyState, dropzone: !!document.querySelector('.dropzone'), nav: [...document.querySelectorAll('.nav__item')].map(n=>n.textContent.trim()) };" },
+  { "type": "eval", "expr": "return fetch('http://127.0.0.1:4790/vendor/lib/fflate/esm/browser.js').then(r => ({ fflate: r.status })).catch(e => ({ fflate: 'FAIL' }));" },
+  { "type": "eval", "expr": "localStorage.setItem('prism.engineMirror', 'http://127.0.0.1:1/nope.tgz'); return 'mirror-broken';" },
+  { "type": "upload", "selector": ".dropzone input[type=file]", "files": ["tests/fixtures/e2e/音调.wav", "tests/fixtures/e2e/chatgpt-导出.json"], "settle": 2500 },
+  { "type": "wait", "forSelector": "[data-file-card]", "timeout": 25000 },
+  { "type": "wait", "ms": 1000 },
+  { "type": "eval", "expr": "const card = [...document.querySelectorAll('[data-file-card]')].find(c => c.querySelector('.filecard__name').textContent.includes('音调')); [...card.querySelectorAll('.chip')].find(c => c.textContent.includes('MP3'))?.click(); return 'mp3';" },
+  { "type": "wait", "ms": 600 },
+  { "type": "click", "selector": ".panel__head .btn--primary", "settle": 4000 },
+  { "type": "wait", "ms": 30000 },
+  { "type": "eval", "expr": "const cards = [...document.querySelectorAll('[data-file-card]')]; return cards.map(c => ({ name: c.querySelector('.filecard__name').textContent, state: c.dataset.state, results: [...c.querySelectorAll('.result__name')].map(n=>n.textContent), notes: [...c.querySelectorAll('.case__detail')].map(e=>e.textContent.slice(0,120)).slice(0,4), errors: [...c.querySelectorAll('[data-status=fail] .case__detail')].map(e=>e.textContent.slice(0,160)) }));" },
+  { "type": "screenshot", "path": ".tmp/shots/offline-package.png", "fullPage": true }
+]

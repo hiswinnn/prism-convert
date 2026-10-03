@@ -23,6 +23,9 @@ const ROOT = resolve(args.get('dir') ?? 'src');
 const NODE_MODULES = resolve('node_modules');
 const PORT = Number(args.get('port') ?? process.env.PORT ?? 4780);
 const HOST = String(args.get('host') ?? '0.0.0.0');
+// 离线分发包（dist 里已把 vendor 物化进 dist/vendor/lib）不需要再映射到 node_modules，
+// 否则 resolvePath 会把已存在的本地文件又指到不存在的 node_modules 上，反而 404。
+const VENDOR_MAP = args.has('no-vendor-map') ? false : true;
 
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -42,7 +45,7 @@ function resolvePath(urlPath) {
   if (segments.includes('..')) return null;
   const clean = segments.join('/');
 
-  if (clean.startsWith('vendor/lib/')) {
+  if (clean.startsWith('vendor/lib/') && VENDOR_MAP) {
     const target = resolve(NODE_MODULES, clean.slice('vendor/lib/'.length));
     return target.startsWith(NODE_MODULES) ? target : null;
   }
