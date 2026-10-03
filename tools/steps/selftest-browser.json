@@ -1,0 +1,10 @@
+[
+  { "type": "goto", "url": "http://127.0.0.1:4781/?view=selftest&autorun=1", "settle": 3000 },
+  { "type": "setDesktop", "width": 1440, "height": 1100 },
+  { "type": "wait", "ms": 60000 },
+  {
+    "type": "eval",
+    "expr": "return { summary: document.querySelector('.badge--ok, .badge--err')?.textContent?.trim(), cases: [...document.querySelectorAll('.case')].map(c => ({ status: c.dataset.status, name: c.querySelector('.case__name')?.textContent, detail: c.querySelector('.case__detail')?.textContent?.slice(0,80) })) };"
+  },
+  { "type": "screenshot", "path": ".tmp/shots/selftest-browser.png", "fullPage": true }
+]

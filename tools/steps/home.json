@@ -1,0 +1,15 @@
+[
+  { "type": "goto", "url": "http://127.0.0.1:4780/?view=work", "settle": 1600 },
+  { "type": "setDesktop", "width": 1440, "height": 1000 },
+  { "type": "screenshot", "path": ".tmp/shots/desktop-work.png" },
+  { "type": "eval", "expr": "return { title: document.title, navItems: [...document.querySelectorAll('.nav__item')].map(n => n.textContent.trim()), dropzone: !!document.querySelector('.dropzone'), cards: document.querySelectorAll('.filecard').length, theme: document.documentElement.dataset.theme, perf: document.documentElement.dataset.perf, cssLoaded: getComputedStyle(document.querySelector('.dropzone')).borderStyle, fontFamily: getComputedStyle(document.body).fontFamily.slice(0,40) };" },
+  { "type": "setMobile", "width": 390, "height": 844 },
+  { "type": "screenshot", "path": ".tmp/shots/mobile-work.png", "fullPage": true },
+  { "type": "eval", "expr": "return { tabbarVisible: getComputedStyle(document.querySelector('.tabbar')).display, navHidden: getComputedStyle(document.querySelector('.nav')).display, tabItems: [...document.querySelectorAll('.tabbar__item')].map(n => n.textContent.trim()) };" },
+  { "type": "setDesktop" },
+  { "type": "goto", "url": "http://127.0.0.1:4780/?view=matrix", "settle": 1200 },
+  { "type": "screenshot", "path": ".tmp/shots/desktop-matrix.png", "fullPage": true },
+  { "type": "eval", "expr": "return { cards: document.querySelectorAll('.matrix__card').length, first: document.querySelector('.matrix__card .panel__title')?.textContent?.trim() };" },
+  { "type": "goto", "url": "http://127.0.0.1:4780/?view=settings", "settle": 1200 },
+  { "type": "screenshot", "path": ".tmp/shots/desktop-settings.png", "fullPage": true }
+]

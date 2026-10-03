@@ -1,0 +1,20 @@
+# 依赖与产物（依赖靠一次 npm install 装齐，产物由 scripts/build.mjs 生成）
+node_modules/
+dist/
+
+# 本地产物与临时目录
+.tmp/
+.recovery/
+tools/*.log
+tests/.tmp/
+tests/fixtures/e2e/
+
+# 系统与编辑器
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# 说明：tests/fixtures 下的夹具全部由 tools/make-fixtures.mjs 现场生成，
+# 不留二进制在仓库里，避免仓库膨胀与「夹具和生成脚本不一致」。

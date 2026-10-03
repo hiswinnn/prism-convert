@@ -1,0 +1,33 @@
+[
+  { "type": "goto", "url": "http://127.0.0.1:4780/?view=work", "settle": 1500 },
+  { "type": "setDesktop", "width": 1440, "height": 1100 },
+  {
+    "type": "upload",
+    "selector": ".dropzone input[type=file]",
+    "files": [
+      "tests/fixtures/e2e/色块.bmp",
+      "tests/fixtures/e2e/音调.wav"
+    ],
+    "settle": 2000
+  },
+  { "type": "wait", "forSelector": "[data-file-card]", "timeout": 20000 },
+  { "type": "wait", "ms": 800 },
+  {
+    "type": "eval",
+    "expr": "const card = [...document.querySelectorAll('[data-file-card]')].find(c => c.querySelector('.filecard__name').textContent.includes('色块')); const chip = [...card.querySelectorAll('.chip')].find(c => c.textContent.includes('JPEG')); if (!chip) return { error: 'no jpeg chip', chips: [...card.querySelectorAll('.chip')].map(c=>c.textContent.trim()) }; chip.click(); return { clicked: 'jpeg' };"
+  },
+  { "type": "wait", "ms": 600 },
+  {
+    "type": "eval",
+    "expr": "const card = [...document.querySelectorAll('[data-file-card]')].find(c => c.querySelector('.filecard__name').textContent.includes('音调')); const chip = [...card.querySelectorAll('.chip')].find(c => c.textContent.includes('MP3')); if (!chip) return { error: 'no mp3 chip', chips: [...card.querySelectorAll('.chip')].map(c=>c.textContent.trim()) }; chip.click(); return { clicked: 'mp3' };"
+  },
+  { "type": "wait", "ms": 600 },
+  { "type": "screenshot", "path": ".tmp/shots/browser-paths-before.png" },
+  { "type": "click", "selector": ".panel__head .btn--primary", "settle": 5000 },
+  { "type": "wait", "ms": 25000 },
+  {
+    "type": "eval",
+    "expr": "return { done: document.querySelectorAll('[data-state=done]').length, error: document.querySelectorAll('[data-state=error]').length, results: [...document.querySelectorAll('.result')].map(r => ({ name: r.querySelector('.result__name')?.textContent, badges: [...r.querySelectorAll('.badge')].map(b => b.textContent.trim()) })), errors: [...document.querySelectorAll('[data-status=fail] .case__detail')].map(e => e.textContent.slice(0, 200)), notes: [...document.querySelectorAll('.case__detail')].map(e => e.textContent.slice(0, 140)).slice(0, 10), wasm: typeof WebAssembly !== 'undefined', offscreen: typeof OffscreenCanvas !== 'undefined' };"
+  },
+  { "type": "screenshot", "path": ".tmp/shots/browser-paths-after.png", "fullPage": true }
+]

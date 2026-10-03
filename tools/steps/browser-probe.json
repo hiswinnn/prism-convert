@@ -1,0 +1,4 @@
+[
+  { "type": "goto", "url": "http://127.0.0.1:4781/?view=work", "settle": 2500 },
+  { "type": "eval", "file": "tools/scripts/browser-probe.js" }
+]

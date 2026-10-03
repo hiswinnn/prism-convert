@@ -1,0 +1,12 @@
+﻿import { readFileSync } from 'node:fs';
+import { zstdDecompressSync } from 'node:zlib';
+const f = 'C:/Users/Sunjia/.dsh/sessions/--C-Users-Sunjia-Desktop--/ce4200f3-ce05-4b32-8e34-108378da5e40/session.v4.jsonl.zstd';
+const t = zstdDecompressSync(readFileSync(f)).toString('utf8');
+const lines = t.split('\n').filter(Boolean);
+console.log('lines =', lines.length, 'bytes =', t.length);
+console.log('包含 file_path 的行数 =', lines.filter(l => l.includes('file_path')).length);
+console.log('包含 engine.test.mjs 的行数 =', lines.filter(l => l.includes('engine.test.mjs')).length);
+console.log('包含 write 的行数 =', lines.filter(l => l.includes('"write"')).length);
+for (const l of lines.slice(0, 3)) console.log('SAMPLE:', l.slice(0, 400));
+const hit = lines.find(l => l.includes('engine.test.mjs'));
+if (hit) console.log('\nHIT:', hit.slice(0, 1200));

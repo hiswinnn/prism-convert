@@ -1,0 +1,36 @@
+[
+  { "type": "goto", "url": "http://127.0.0.1:4780/?view=work", "settle": 1500 },
+  { "type": "setDesktop", "width": 1440, "height": 1100 },
+  {
+    "type": "upload",
+    "selector": ".dropzone input[type=file]",
+    "files": [
+      "tests/fixtures/e2e/chatgpt-导出.json",
+      "tests/fixtures/e2e/小说片段-gbk.txt",
+      "tests/fixtures/e2e/繁體段落-big5.txt",
+      "tests/fixtures/e2e/员工表.xlsx",
+      "tests/fixtures/e2e/季度报告.docx",
+      "tests/fixtures/e2e/色块.bmp",
+      "tests/fixtures/e2e/字幕.srt",
+      "tests/fixtures/e2e/样张.pdf"
+    ],
+    "settle": 3000
+  },
+  { "type": "wait", "forSelector": "[data-file-card]", "timeout": 30000 },
+  { "type": "wait", "ms": 1500 },
+  {
+    "type": "eval",
+    "expr": "return [...document.querySelectorAll('[data-file-card]')].map(card => ({ name: card.querySelector('.filecard__name').textContent, badges: [...card.querySelectorAll('.badge')].map(b => b.textContent.trim()), targets: [...card.querySelectorAll('.chip')].map(c => c.textContent.trim()).slice(0, 6) }));"
+  },
+  { "type": "screenshot", "path": ".tmp/shots/e2e-queue-desktop.png" },
+  { "type": "setMobile", "width": 390, "height": 844 },
+  { "type": "screenshot", "path": ".tmp/shots/e2e-queue-mobile.png", "fullPage": true },
+  { "type": "setDesktop" },
+  { "type": "click", "selector": ".panel__head .btn--primary", "settle": 12000 },
+  { "type": "wait", "ms": 8000 },
+  {
+    "type": "eval",
+    "expr": "return { done: document.querySelectorAll('[data-state=done]').length, error: document.querySelectorAll('[data-state=error]').length, results: [...document.querySelectorAll('.result')].map(r => ({ name: r.querySelector('.result__name')?.textContent, badges: [...r.querySelectorAll('.badge')].map(b => b.textContent.trim()) })), errors: [...document.querySelectorAll('[data-status=fail] .case__detail')].map(e => e.textContent.slice(0, 120)), notes: [...document.querySelectorAll('.case__detail')].map(e => e.textContent.slice(0, 90)).slice(0, 12) };"
+  },
+  { "type": "screenshot", "path": ".tmp/shots/e2e-results-desktop.png", "fullPage": true }
+]

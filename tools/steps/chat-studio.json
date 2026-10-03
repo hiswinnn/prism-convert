@@ -1,0 +1,17 @@
+[
+  { "type": "goto", "url": "http://127.0.0.1:4781/?view=work", "settle": 2000 },
+  { "type": "setDesktop", "width": 1440, "height": 1100 },
+  { "type": "upload", "selector": ".dropzone input[type=file]", "files": ["tests/fixtures/e2e/chatgpt-导出.json"], "settle": 2500 },
+  { "type": "wait", "forSelector": "[data-file-card]", "timeout": 20000 },
+  { "type": "wait", "ms": 1200 },
+  { "type": "screenshot", "path": ".tmp/shots/chat-queue.png" },
+  { "type": "eval", "expr": "const btn = [...document.querySelectorAll('.filecard .btn')].find(b => b.textContent.includes('对话工坊')); if (!btn) return { error: 'no studio button', buttons: [...document.querySelectorAll('.filecard .btn')].map(b=>b.textContent.trim()) }; btn.click(); return 'opened';" },
+  { "type": "wait", "ms": 3000 },
+  {
+    "type": "eval",
+    "expr": "return { title: document.querySelector('.panel__title')?.textContent?.trim(), stats: [...document.querySelectorAll('.statcard')].map(c => c.textContent.trim()).slice(0,4), conversations: [...document.querySelectorAll('.filelist .filecard__name')].map(n => n.textContent.trim()), preview: document.querySelector('[data-chat-preview]')?.textContent?.slice(0, 400), statsBadge: document.querySelector('[data-chat-stats]')?.textContent };"
+  },
+  { "type": "screenshot", "path": ".tmp/shots/chat-studio-desktop.png", "fullPage": true },
+  { "type": "setMobile", "width": 390, "height": 844 },
+  { "type": "screenshot", "path": ".tmp/shots/chat-studio-mobile.png", "fullPage": true }
+]
