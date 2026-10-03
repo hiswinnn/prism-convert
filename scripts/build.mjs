@@ -36,11 +36,28 @@ const VENDOR = [
   'turndown/lib/turndown.browser.es.js',
   'js-yaml/dist/js-yaml.mjs',
   '@ffmpeg/ffmpeg/dist/esm',
-  // 只要 esm 版 core：module worker 用 `import(coreURL)` 加载它，umd 版加载不了（见 lib-loader.js 注释）
+  // 只要 esm 版 core：module worker 用 `import(coreURL)` 加载它，umd 版加载不了（见 lib-loader.js 注释）。
+  // 刻意不拷贝 30.7MB 的原始 .wasm——离线兜底用下面的 .gz（浏览器里 fflate 就地解压），
+  // 省下 30MB 体积，安装器才能压在 100MB 以内（GitHub 单个 blob 的上限）。
   '@ffmpeg/core/dist/esm/ffmpeg-core.js',
-  '@ffmpeg/core/dist/esm/ffmpeg-core.wasm',
   'libheif-js/libheif-wasm',
 ];
+
+// 轻量版（桌面安装器用）：不内置音视频引擎、HEIC 解码、Word 生成、PDF 字体映射，
+// 前两类首次用时走国内镜像秒级下载，后两类桌面版暂时退化为「只读不生成/依赖内嵌字体」。
+// 目的只有一个：把安装器压在 GitHub 单文件 100MB 上限以内。Web 版（完整 dist）功能不受影响。
+if (args.has('lite')) {
+  const LITE_EXCLUDE = [
+    '@ffmpeg/core/dist/esm/ffmpeg-core.js',
+    'libheif-js/libheif-wasm',
+    'docx/dist/index.mjs',
+    'pdfjs-dist/cmaps',
+    'pdfjs-dist/standard_fonts',
+  ];
+  for (let i = VENDOR.length - 1; i >= 0; i -= 1) {
+    if (LITE_EXCLUDE.includes(VENDOR[i])) VENDOR.splice(i, 1);
+  }
+}
 
 async function walk(dir, base = dir, out = []) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -80,14 +97,16 @@ if (missing.length) {
 }
 
 // 音视频引擎额外产出 gzip 版：30.7MB → 约 9.8MB。
-// 同源兜底时优先传它（浏览器用 DecompressionStream/fflate 解开），海外托管也能忍。
-const wasmPath = join(OUT, 'vendor', 'lib', '@ffmpeg', 'core', 'dist', 'esm', 'ffmpeg-core.wasm');
-if (existsSync(wasmPath)) {
+// 同源兜底时优先传它（浏览器用 fflate 解开），海外托管也能忍。
+const wasmSource = join(ROOT, 'node_modules', '@ffmpeg', 'core', 'dist', 'esm', 'ffmpeg-core.wasm');
+if (existsSync(wasmSource) && !args.has('lite')) {
   const { gzipSync } = await import('node:zlib');
   const { readFileSync } = await import('node:fs');
-  const gz = gzipSync(readFileSync(wasmPath), { level: 9 });
-  await writeFile(`${wasmPath}.gz`, gz);
-  console.log(`  引擎 gzip：${(gz.length / 1024 / 1024).toFixed(1)} MB（原始 ${(statSync(wasmPath).size / 1024 / 1024).toFixed(1)} MB）`);
+  const gz = gzipSync(readFileSync(wasmSource), { level: 9 });
+  const gzDest = join(OUT, 'vendor', 'lib', '@ffmpeg', 'core', 'dist', 'esm', 'ffmpeg-core.wasm.gz');
+  await mkdir(join(gzDest, '..'), { recursive: true });
+  await writeFile(gzDest, gz);
+  console.log(`  引擎 gzip：${(gz.length / 1024 / 1024).toFixed(1)} MB（原始 ${(statSync(wasmSource).size / 1024 / 1024).toFixed(1)} MB）`);
 }
 
 // GitHub Pages 默认用 Jekyll 处理站点，会忽略下划线开头的文件/目录

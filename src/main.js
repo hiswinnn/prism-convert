@@ -185,6 +185,32 @@ function boot() {
     localStorage.setItem('prism.welcomed', '1');
     setTimeout(() => toast('拖一个文件进来，或直接 Ctrl/⌘+V 粘贴内容', 'info', 4200), 900);
   }
+
+  wireDesktopUpdater();
+}
+
+/** 桌面版（Electron）才有 window.prismDesktop：把「版本更新」进度用轻提示展示出来 */
+function wireDesktopUpdater() {
+  const bridge = window.prismDesktop;
+  if (!bridge) return;
+  let progressToast = null;
+  let lastShown = -1;
+  bridge.onUpdateStatus?.((status) => {
+    if (status === 'checking' || status === 'uptodate') return;
+    if (status?.state === 'available') {
+      toast(`发现新版本 ${status.version}，正在后台下载…`, 'info', 6000);
+    } else if (status?.state === 'downloaded') {
+      toast(`新版本 ${status.version} 已下载完成，稍等片刻即可重启安装`, 'ok', 8000);
+    }
+  });
+  bridge.onUpdateProgress?.((percent) => {
+    const bucket = Math.floor(percent / 10) * 10;
+    if (bucket === lastShown) return;
+    lastShown = bucket;
+    progressToast?.();
+    progressToast = toast(`正在下载更新 ${percent}%`, 'info', 120000);
+  });
+  bridge.onUpdateError?.((message) => toast(`更新检查失败：${message}`, 'err', 6000));
 }
 
 boot();

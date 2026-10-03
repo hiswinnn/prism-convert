@@ -1,0 +1,58 @@
+{
+  "name": "prism-desktop",
+  "productName": "Prism",
+  "version": "1.2.0",
+  "description": "Prism - pure frontend dual-device file converter",
+  "main": "main.js",
+  "author": "hiswinnn",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win nsis",
+    "icon": "node build/make-icon.cjs"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
+  },
+  "devDependencies": {
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.prism.desktop",
+    "productName": "Prism",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      { "from": "../dist", "to": "dist" }
+    ],
+    "asar": true,
+    "electronLanguages": ["zh-CN", "en-US"],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "build/icon.ico",
+      "artifactName": "Prism-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Prism",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true
+    },
+    "publish": [
+      { "provider": "generic", "url": "https://hiswinnn.github.io/prism-convert/updates/" }
+    ]
+  }
+}

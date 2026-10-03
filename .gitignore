@@ -1,6 +1,8 @@
 # 依赖与产物（依赖靠一次 npm install 装齐，产物由 scripts/build.mjs 生成）
 node_modules/
 dist/
+desktop/release/
+desktop/.eb-cache/
 
 # 本地产物与临时目录
 .tmp/
